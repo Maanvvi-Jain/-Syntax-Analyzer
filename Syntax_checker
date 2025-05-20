@@ -1,0 +1,18 @@
+import ast
+import pyflakes.api
+import pyflakes.reporter
+from io import StringIO
+
+def check_syntax(code):
+    try:
+        ast.parse(code)
+        syntax_error = None
+    except SyntaxError as e:
+        syntax_error = f"SyntaxError: {e.msg} (Line {e.lineno}, Column {e.offset})"
+
+    reporter_output = StringIO()
+    reporter = pyflakes.reporter.Reporter(reporter_output, reporter_output)
+    pyflakes.api.check(code, "<input>", reporter=reporter)
+
+    lint_errors = reporter_output.getvalue().strip()
+    return syntax_error, lint_errors
