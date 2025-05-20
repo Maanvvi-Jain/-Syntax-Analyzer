@@ -1,0 +1,28 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from syntax_checker import check_syntax
+from ai_helper import get_ai_feedback
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Change for production
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class CodeInput(BaseModel):
+    code: str
+
+@app.post("/analyze")
+def analyze_code(payload: CodeInput):
+    syntax_error, lint_warnings = check_syntax(payload.code)
+    ai_suggestions = get_ai_feedback(payload.code)
+
+    return {
+        "syntax_error": syntax_error,
+        "lint_warnings": lint_warnings or "None",
+        "ai_feedback": ai_suggestions
+    }
